@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +22,8 @@ public class VideoManager extends Activity {
 	// Text if folder empty
 	private TextView mEmpty = null;
 	// ListView of files
-	private ListView mList = null;
+	private GridView mGrid = null;
+	private ImageView mImage = null;
 	private FileAdapter mAdapter = null;
 	private File mCurrentFile = null;
 	private boolean noParent = false;
@@ -30,11 +33,11 @@ public class VideoManager extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_video_manager);
 		
-		mList = (ListView) findViewById(R.id.listViewFiles);
+		mGrid = (GridView) findViewById(R.id.gridViewFiles);
 		// Test repository mounted (readable) writable ?
 		if (!Environment.MEDIA_MOUNTED.equals(Environment
 				.getExternalStorageState())) {
-			mEmpty = (TextView) mList.getEmptyView();
+			mEmpty = (TextView) mGrid.getEmptyView();
 			mEmpty.setText(R.string.nomounted);
 		} else {
 			mCurrentFile = Environment.getExternalStorageDirectory();
@@ -47,11 +50,11 @@ public class VideoManager extends Activity {
 
 			mAdapter = new FileAdapter(this,
 					android.R.layout.simple_list_item_1, liste);
-			mList.setAdapter(mAdapter);
+			mGrid.setAdapter(mAdapter);
 			mAdapter.sort();
 
 			// Listener open file/folder
-			mList.setOnItemClickListener(new OnItemClickListener() {
+			mGrid.setOnItemClickListener(new OnItemClickListener() {
 				public void onItemClick(AdapterView<?> adapter, View view,
 						int position, long id) {
 					File fichier = mAdapter.getItem(position);

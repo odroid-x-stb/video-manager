@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 public class FileAdapter extends ArrayAdapter<File> {
-	//Organize folder and files (Alphabet + Folder>File)
+	private Context context;
+	// Organize folder and files (Alphabet + Folder>File)
 	private class FileComparator implements Comparator<File> {
 		public int compare(File lhs, File rhs) {
-			//File or Folder
+			// File or Folder
 			if (lhs.isDirectory() && rhs.isFile())
 				return -1;
 			if (lhs.isFile() && rhs.isDirectory())
@@ -30,6 +32,7 @@ public class FileAdapter extends ArrayAdapter<File> {
 	public FileAdapter(Context context, int textViewResourceId,
 			List<File> objects) {
 		super(context, textViewResourceId, objects);
+		this.context = context;
 		mInflater = LayoutInflater.from(context);
 	}
 
@@ -45,12 +48,19 @@ public class FileAdapter extends ArrayAdapter<File> {
 					android.R.layout.simple_list_item_1, null);
 
 		File item = getItem(position);
-		
-		//Color
-		if (item.isDirectory())
+
+		// Color
+		if (item.isDirectory()) {
 			vue.setTextColor(Color.BLUE);
-		else
+			Drawable myIcon = context.getResources().getDrawable(R.drawable.folder);
+			vue.setCompoundDrawablesWithIntrinsicBounds(myIcon, null,
+					null, null );
+		} else{
 			vue.setTextColor(Color.BLACK);
+			Drawable myIcon = context.getResources().getDrawable(R.drawable.file);
+			vue.setCompoundDrawablesWithIntrinsicBounds(myIcon, null,
+					null, null );
+		}
 		vue.setText(item.getName());
 		return vue;
 	}
@@ -58,5 +68,5 @@ public class FileAdapter extends ArrayAdapter<File> {
 	public void sort() {
 		super.sort(new FileComparator());
 	}
-	
+
 }
