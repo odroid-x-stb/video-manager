@@ -95,45 +95,25 @@ public class HttpUploader extends Service {
 				InputStream in = new BufferedInputStream(new FileInputStream(f)); 
 				ByteArrayOutputStream byte_array = new ByteArrayOutputStream(); 
 				BufferedOutputStream buffer = new BufferedOutputStream(byte_array); 
-
-				byte read = (byte) in.read(); 
-				byte[] to_write = new byte[4096]; 
-				int count = 0; 
-				long cursor=0; 
-				while(read > -1) 
-				{ 
-					//On lit les données du fichier 
-					to_write[count] = read; 
-					read = (byte) in.read(); 
-					count++; 
-					//Quand on a rempli le tableau, on envoie un paquet de 4096 octets 
-					if(count == 4096) 
-					{ 
-						count=0; 
-						cursor++; 
-						//On remplit le tampon 
-						for(int x=0;x<4096;x++) 
-							buffer.write(to_write[x]); 
-
-						//Et on l'envoie 
-						fluxsortie.write(byte_array.toByteArray()); 
-
-						byte_array.reset(); 
-					} 
-				} 
-
-				//On envoie le dernier paquet, qui ne fait pas forcément 4096 octets 
-				//On remplit le tampon 
-				for(int x=0;x<4096;x++) 
-					buffer.write(to_write[x]); 
-
-				//Et on l'envoie 
-				buffer.flush(); 
+				
+				byte[] to_write = new byte[4096];
+				for (int i = 0; i < nb_parts; i++) {
+					in.read(to_write, 0,4096 );
+					buffer.write(to_write);
+					buffer.flush();
+					fluxsortie.write(byte_array.toByteArray()); 
+					byte_array.reset();
+				}
+				int remaining = (int) (f.length() - nb_parts*4096);
+				in.read(to_write, 0, remaining);
+				buffer.write(to_write);
+				buffer.flush();
 				fluxsortie.write(byte_array.toByteArray()); 
-				fluxsortie.flush(); 
-
+				byte_array.reset();
+				//in.read(to_write, nb_parts * 4096, f.length());
+				buffer.close();
+				fluxsortie.close();
 				in.close(); 
-				buffer.close(); 
 				s.close(); 
 			}
 			catch (UnknownHostException e) {
@@ -145,12 +125,12 @@ public class HttpUploader extends Service {
 		}
 	}
 
-			public void onDestroy() {
+	public void onDestroy() {
 		mUploadLooper.quit();
 
 		if (check == 0) { // http response contains no error
 			Toast.makeText(HttpUploader.this, "envoyée", Toast.LENGTH_SHORT)
-					.show();
+			.show();
 		} else {
 			Toast.makeText(HttpUploader.this, "échec d'envoi",
 					Toast.LENGTH_SHORT).show();
