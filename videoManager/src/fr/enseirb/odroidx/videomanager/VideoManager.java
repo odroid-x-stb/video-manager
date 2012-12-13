@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
@@ -12,8 +14,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +23,12 @@ public class VideoManager extends Activity {
 	private TextView mEmpty = null;
 	// ListView of files
 	private GridView mGrid = null;
-	private ImageView mImage = null;
 	private FileAdapter mAdapter = null;
 	private File mCurrentFile = null;
 	private boolean noParent = false;
+	protected Uri videoToupload=null;
+	File fichier;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -114,11 +116,16 @@ public class VideoManager extends Activity {
 	}
 
 	private void seeItem(File pFile) {
-		String extension = pFile.getName()
-				.substring(pFile.getName().indexOf(".") + 1).toLowerCase();
-		if (extension.equals("avi")) {
+		//String extension = pFile.getName()
+				//.substring(pFile.getName().indexOf(".") + 1).toLowerCase();
+		//if (extension.equals("avi")) {
 			// upload(Uri.fromFile(pFile), "video/avi");
-		}
+			videoToupload = Uri.fromFile(pFile);
+			Intent uploadIntent = new Intent( );
+			uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.HttpUploader");
+			uploadIntent.setData(videoToupload);
+			startService(uploadIntent);
+		//}
 	}
 
 }
