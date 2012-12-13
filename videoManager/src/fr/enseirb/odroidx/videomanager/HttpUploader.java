@@ -1,16 +1,17 @@
 package fr.enseirb.odroidx.videomanager;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import android.app.Service;
 import android.content.Intent;
@@ -82,135 +83,83 @@ public class HttpUploader extends Service {
 	}
 
 	public void doHttpUpload(Uri myFile) {
-		String lineEnd = "\r\n";
-		String twoHyphens = "--";
-		String boundary = "*****";
-		String videofile = null;
-		String httpResponse; // to read http response
-		String filename = null;
+		File f = new File(myFile.getPath()); 
+		if(f.exists()) 
+		{ 
+			Socket s;
+			try {
+				s = new Socket(InetAddress.getByName("192.168.1.8"),5088);
+				OutputStream fluxsortie = s.getOutputStream(); 
+				long nb_parts= f.length() / 4096; 
 
-		String urlString = "http://192.168.1.8/fileUpload.php";
-		HttpURLConnection conn = null;
+				InputStream in = new BufferedInputStream(new FileInputStream(f)); 
+				ByteArrayOutputStream byte_array = new ByteArrayOutputStream(); 
+				BufferedOutputStream buffer = new BufferedOutputStream(byte_array); 
 
-		InputStream fis = null;
-		String pathfile;
+				byte read = (byte) in.read(); 
+				byte[] to_write = new byte[4096]; 
+				int count = 0; 
+				long cursor=0; 
+				while(read > -1) 
+				{ 
+					//On lit les données du fichier 
+					to_write[count] = read; 
+					read = (byte) in.read(); 
+					count++; 
+					//Quand on a rempli le tableau, on envoie un paquet de 4096 octets 
+					if(count == 4096) 
+					{ 
+						count=0; 
+						cursor++; 
+						//On remplit le tampon 
+						for(int x=0;x<4096;x++) 
+							buffer.write(to_write[x]); 
 
-		try {
-			URL site = new URL(urlString);
-			fis = new FileInputStream(myFile.getPath());
-			conn = (HttpURLConnection) site.openConnection();
+						//Et on l'envoie 
+						fluxsortie.write(byte_array.toByteArray()); 
 
-			// on peut écrire et lire
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
+						byte_array.reset(); 
+					} 
+				} 
 
-			// Use a post method.
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Connection", "Keep-Alive");
-			conn.setRequestProperty("Content-Type",
-					"multipart/form-data;boundary=" + boundary);
+				//On envoie le dernier paquet, qui ne fait pas forcément 4096 octets 
+				//On remplit le tampon 
+				for(int x=0;x<4096;x++) 
+					buffer.write(to_write[x]); 
 
-			DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+				//Et on l'envoie 
+				buffer.flush(); 
+				fluxsortie.write(byte_array.toByteArray()); 
+				fluxsortie.flush(); 
 
-			dos.writeBytes(twoHyphens + boundary + lineEnd);
-			Log.i(getClass().getSimpleName(), "Display name : " + videofile);
-			Log.i(getClass().getSimpleName(), "Filename : " + filename);
-			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
-					+ filename + "\"" + lineEnd);
-			dos.writeBytes(lineEnd);
-
-			Log.i(getClass().getSimpleName(), "Headers are written");
-
-			// compression de image pour envoi
-			dos.write(ToByteArray(myFile));
-			// send multipart form data necesssary after file data...
-			dos.writeBytes(lineEnd);
-			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-			// close streams
-			fis.close();
-			dos.flush();
-			dos.close();
-			Log.e("fileUpload", "File is written on the queue");
-
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			Toast.makeText(HttpUploader.this,
-					"échec de connexion au site web ", Toast.LENGTH_SHORT)
-					.show();
-			Log.i(getClass().getSimpleName(),
-					"échec de connexion au site web 1");
-		} catch (IOException e) {
-			e.printStackTrace();
-			Toast.makeText(HttpUploader.this,
-					"échec de connexion au site web ", Toast.LENGTH_SHORT)
-					.show();
-			Log.i(getClass().getSimpleName(),
-					"échec de connexion au site web 2");
-		}
-
-		// lecture de la réponse http
-		try {
-			BufferedReader rd = new BufferedReader(new InputStreamReader(
-					conn.getInputStream()));
-			Log.i(getClass().getSimpleName(), "try HTTP reponse");
-			while ((httpResponse = rd.readLine()) != null) {
-				Log.i(getClass().getSimpleName(), "HTTP reponse= "
-						+ httpResponse);
-				if (httpResponse.contains("error")) {
-					// there is a http error
-					check += 1;
-				}
+				in.close(); 
+				buffer.close(); 
+				s.close(); 
 			}
-			rd.close();
-		} catch (IOException ioex) {
-			Log.e("HttpUploader", "error: " + ioex.getMessage(), ioex);
-			ioex.printStackTrace();
-			Toast.makeText(HttpUploader.this,
-					"échec de lecture de la réponse du site web ",
+			catch (UnknownHostException e) {
+				Log.i(getClass().getSimpleName(), "Unknown host");
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} 
+		}
+	}
+
+			public void onDestroy() {
+		mUploadLooper.quit();
+
+		if (check == 0) { // http response contains no error
+			Toast.makeText(HttpUploader.this, "envoyée", Toast.LENGTH_SHORT)
+					.show();
+		} else {
+			Toast.makeText(HttpUploader.this, "échec d'envoi",
 					Toast.LENGTH_SHORT).show();
-			Log.i(getClass().getSimpleName(),
-					"échec de lecture de la réponse du site web");
 		}
-
+		super.onDestroy();
 	}
 
-	public byte[] ToByteArray(Uri myFile){
-		File file = new File(myFile.getPath());
-		byte fileContent[] = null;
-		try
-		{
-			FileInputStream fin = new FileInputStream(file);
-			fileContent = new byte[(int)file.length()];
-			fin.read(fileContent);
-		}
-		catch(FileNotFoundException e)
-		{
-			System.out.println("File not found" + e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return fileContent; 
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
 	}
-
-// Method called when the (instance of) the Service is requested to
-// terminate
-public void onDestroy() {
-	mUploadLooper.quit();
-
-	if (check == 0) { // http response contains no error
-		Toast.makeText(HttpUploader.this, "envoyée",
-				Toast.LENGTH_SHORT).show();
-	} else {
-		Toast.makeText(HttpUploader.this, "échec d'envoi",
-				Toast.LENGTH_SHORT).show();
-	}
-	super.onDestroy();
-}
-
-@Override
-public IBinder onBind(Intent intent) {
-	return null;
-}
 }
