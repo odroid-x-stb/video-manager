@@ -18,15 +18,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class VideoManager extends Activity {
-
-	// Text if folder empty
 	private TextView mEmpty = null;
-	// ListView of files
 	private GridView mGrid = null;
 	private FileAdapter mAdapter = null;
 	private File mCurrentFile = null;
 	private boolean noParent = false;
-	protected Uri videoToupload=null;
+	protected Uri videoToUpload=null;
 	File fichier;
 
 
@@ -34,7 +31,7 @@ public class VideoManager extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_video_manager);
-		
+
 		mGrid = (GridView) findViewById(R.id.gridViewFiles);
 		// Test repository mounted (readable) writable ?
 		if (!Environment.MEDIA_MOUNTED.equals(Environment
@@ -72,7 +69,6 @@ public class VideoManager extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_video_manager, menu);
 		return true;
 	}
@@ -105,7 +101,7 @@ public class VideoManager extends Activity {
 				// No more parent, clic twice to leave
 				if (noParent != true) {
 					Toast.makeText(this, R.string.noparent, Toast.LENGTH_SHORT)
-							.show();
+					.show();
 					noParent = true;
 				} else
 					finish();
@@ -116,12 +112,10 @@ public class VideoManager extends Activity {
 	}
 
 	private void seeItem(File pFile) {
-			videoToupload = Uri.fromFile(pFile);
-			Intent uploadIntent = new Intent( );
-			uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.HttpUploader");
-			uploadIntent.setData(videoToupload);
-			startService(uploadIntent);
-		//}
+		videoToUpload = Uri.fromFile(pFile);
+		Intent uploadIntent = new Intent( );
+		uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.HttpUploader");
+		uploadIntent.setData(videoToUpload);
+		startService(uploadIntent);
 	}
-
 }
