@@ -7,7 +7,7 @@
     <string name="noparent">Vous êtes à la racine. Retour pour quitter</string>
     <string name="nomounted">Aucun périphérique</string>
     <color name="background">#99CCFF</color>
-    <string name="uploadStart">Upload starting ...</string>
+    <string name="uploadStart">Upload starting</string>
     <string name="ip_server">192.168.1.8</string>
     <string name="unknown">Unknown host</string>
     <string name="uploadEnd">Upload finished</string>
