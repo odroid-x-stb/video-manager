@@ -114,7 +114,7 @@ public class VideoManager extends Activity {
 	private void seeItem(File pFile) {
 		videoToUpload = Uri.fromFile(pFile);
 		Intent uploadIntent = new Intent( );
-		uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.HttpUploader");
+		uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.Uploader");
 		uploadIntent.setData(videoToUpload);
 		startService(uploadIntent);
 	}

@@ -37,8 +37,8 @@ import android.widget.Toast;
 public class Uploader extends Service {
 	static int NOTIFY_ID = 1;
 	static int PORT = 5088;
-	static String SERVER_IP = "192.168.1.8";
-	static String SERVLET_UPLOAD = "http://192.168.1.8:8080/dash-manager/upload?name=";
+	static String SERVER_IP = "192.168.21.120";
+	static String SERVLET_UPLOAD = "http://192.168.21.120:8080/dash-manager/upload?name=";
 	NotificationManager mNotifyManager = null;
 	Builder mBuilder = null;
 	private Intent mInvokeIntent;
