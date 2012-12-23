@@ -3,13 +3,15 @@
 
     <string name="app_name">videoManager</string>
     <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
+    <string name="menu_ip">Entrer l\'adresse du serveur</string>
     <string name="noparent">Vous êtes à la racine. Retour pour quitter</string>
     <string name="nomounted">Aucun périphérique</string>
     <color name="background">#99CCFF</color>
     <string name="uploadStart">Upload starting</string>
     <string name="ip_server">192.168.1.8</string>
-    <string name="unknown">Unknown host</string>
+    <string name="unknown">Hote inconnu</string>
+    <string name="connectionFailed">Erreur de connexion</string>
     <string name="uploadEnd">Upload finished</string>
     <string name="uploadFailed">Upload Failed</string>
+    <string name="quit">Quitter</string>
 </resources>

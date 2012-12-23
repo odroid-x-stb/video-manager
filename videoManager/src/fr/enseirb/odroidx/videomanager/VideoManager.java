@@ -5,11 +5,14 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -18,19 +21,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class VideoManager extends Activity {
+	private static int CODE_RETOUR = 1;
+	private String ip = null;
 	private TextView mEmpty = null;
 	private GridView mGrid = null;
 	private FileAdapter mAdapter = null;
 	private File mCurrentFile = null;
 	private boolean noParent = false;
-	protected Uri videoToUpload=null;
+	protected Uri videoToUpload = null;
 	File fichier;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_video_manager);
+
+		Intent home = getIntent();
+		if (home.getStringExtra("serverIP") != null) {
+			ip = home.getStringExtra("serverIP");
+		}
 
 		mGrid = (GridView) findViewById(R.id.gridViewFiles);
 		// Test repository mounted (readable) writable ?
@@ -66,11 +75,35 @@ public class VideoManager extends Activity {
 		}
 	}
 
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_video_manager, menu);
 		return true;
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_ip) {
+			startActivityForResult(new Intent(this, Parameters.class),
+					CODE_RETOUR);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void getPreferences() {
+
+		SharedPreferences preferences = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		ip = preferences.getString("ip", "");
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == CODE_RETOUR) {
+			getPreferences();
+			Toast.makeText(this, "Nouvelle IP : ".concat(ip), Toast.LENGTH_SHORT)
+			.show();
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	public void setEmpty() {
@@ -101,7 +134,7 @@ public class VideoManager extends Activity {
 				// No more parent, clic twice to leave
 				if (noParent != true) {
 					Toast.makeText(this, R.string.noparent, Toast.LENGTH_SHORT)
-					.show();
+							.show();
 					noParent = true;
 				} else
 					finish();
@@ -113,8 +146,10 @@ public class VideoManager extends Activity {
 
 	private void seeItem(File pFile) {
 		videoToUpload = Uri.fromFile(pFile);
-		Intent uploadIntent = new Intent( );
-		uploadIntent.setClassName("fr.enseirb.odroidx.videomanager", "fr.enseirb.odroidx.videomanager.Uploader");
+		Intent uploadIntent = new Intent();
+		uploadIntent.putExtra("IP", ip);
+		uploadIntent.setClassName("fr.enseirb.odroidx.videomanager",
+				"fr.enseirb.odroidx.videomanager.Uploader");
 		uploadIntent.setData(videoToUpload);
 		startService(uploadIntent);
 	}

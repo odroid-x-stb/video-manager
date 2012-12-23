@@ -15,7 +15,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@android:style/Theme.Holo">
         <activity
             android:name="fr.enseirb.odroidx.videomanager.VideoManager"
             android:label="@string/app_name" >
@@ -25,7 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name="fr.enseirb.odroidx.videomanager.Parameters"
+            android:label="@string/menu_ip" 
+            android:theme="@android:style/Theme.Holo">
+        </activity>
         <service android:name="fr.enseirb.odroidx.videomanager.Uploader" >
         </service>
     </application>
