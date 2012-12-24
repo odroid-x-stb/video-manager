@@ -78,6 +78,10 @@ public class VideoManager extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_video_manager, menu);
+		if (ip == null) {
+			getPreferences();
+			Toast.makeText(this, "IP : ".concat(ip), Toast.LENGTH_SHORT).show();
+		}
 		return true;
 	}
 

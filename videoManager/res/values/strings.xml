@@ -11,6 +11,7 @@
     <string name="ip_server">192.168.1.8</string>
     <string name="unknown">Hote inconnu</string>
     <string name="connectionFailed">Erreur de connexion</string>
+    <string name="serverDead">Serveur indisponible</string>
     <string name="uploadEnd">Upload finished</string>
     <string name="uploadFailed">Upload Failed</string>
     <string name="quit">Quitter</string>

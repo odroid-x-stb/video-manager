@@ -36,6 +36,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class Uploader extends Service {
+	private static final int CONNECTION_ERROR = 1;
+	private static final int UNKNOWN = 2;
+	private static final int HTTP_SERVER = 3;
 	static int NOTIFY_ID = 1;
 	static int PART_SIZE = 6024;
 	static int PORT = 5088;
@@ -47,7 +50,7 @@ public class Uploader extends Service {
 	private volatile ServiceHandler mUploadHandler;
 	private HttpClient client = null;
 
-	private int check = 0;
+	private int STATUS = 0;
 
 	private final class ServiceHandler extends Handler {
 		public ServiceHandler(Looper looper) {
@@ -61,7 +64,7 @@ public class Uploader extends Service {
 
 			// upload the file to the web server
 			doUpload(selectedFile);
-
+			Log.e(getClass().getSimpleName(), "" + STATUS);
 			Log.i(getClass().getSimpleName(), "Message: " + msg);
 			Log.i(getClass().getSimpleName(), "Done with #" + msg.arg1);
 			stopSelf(msg.arg1);
@@ -92,8 +95,6 @@ public class Uploader extends Service {
 		} else {
 			mUploadHandler.sendMessage(msg);
 			Log.d(getClass().getSimpleName(), "Sending: " + msg);
-			Toast.makeText(Uploader.this, "Upload started", Toast.LENGTH_SHORT)
-					.show();
 		}
 	}
 
@@ -107,12 +108,12 @@ public class Uploader extends Service {
 			try {
 				Log.e(getClass().getSimpleName(), "test: " + server_ip);
 				s = new Socket(InetAddress.getByName(server_ip), 5088);// Bug
-																		// using
-																		// variable
-																		// port
+				// using
+				// variable
+				// port
 				OutputStream fluxsortie = s.getOutputStream();
 				int nb_parts = (int) (f.length() / PART_SIZE);
-				
+
 				InputStream in = new BufferedInputStream(new FileInputStream(f));
 				ByteArrayOutputStream byte_array = new ByteArrayOutputStream();
 				BufferedOutputStream buffer = new BufferedOutputStream(
@@ -141,13 +142,17 @@ public class Uploader extends Service {
 				in.close();
 				s.close();
 			} catch (ConnectException e) {
-				Toast.makeText(getApplicationContext(), "putain",Toast.LENGTH_SHORT).show();
-				System.out.println("putain");
+				if (STATUS != HTTP_SERVER)
+					STATUS = CONNECTION_ERROR;
 				e.printStackTrace();
 			} catch (UnknownHostException e) {
+				if (STATUS != HTTP_SERVER)
+					STATUS = UNKNOWN;
 				Log.i(getClass().getSimpleName(), "Unknown host");
 				e.printStackTrace();
 			} catch (IOException e) {
+				if (STATUS != HTTP_SERVER)
+					STATUS = CONNECTION_ERROR;
 				e.printStackTrace();
 			}
 		}
@@ -155,20 +160,27 @@ public class Uploader extends Service {
 
 	public void onDestroy() {
 		mUploadLooper.quit();
-
-		if (check == 0) { // http response contains no error
+		Log.e(getClass().getSimpleName(), "destroy" + STATUS);
+		switch (STATUS) {
+		case CONNECTION_ERROR:
+			Toast.makeText(getApplicationContext(), R.string.connectionFailed,
+					Toast.LENGTH_SHORT).show();
+			break;
+		case UNKNOWN:
+			Toast.makeText(Uploader.this, R.string.unknown, Toast.LENGTH_SHORT)
+					.show();
+			break;
+		case HTTP_SERVER:
+			Toast.makeText(Uploader.this, R.string.serverDead,
+					Toast.LENGTH_SHORT).show();
+			break;
+		default:
 			Toast.makeText(Uploader.this, R.string.uploadEnd,
 					Toast.LENGTH_SHORT).show();
-			mBuilder.setContentText("Download complete")
-			// Removes the progress bar
-					.setProgress(0, 0, false);
-		} else {
-			Toast.makeText(Uploader.this, R.string.uploadFailed,
-					Toast.LENGTH_SHORT).show();
-			mBuilder.setContentText("Download Failed")
-			// Removes the progress bar
-					.setProgress(0, 0, false);
 		}
+		mBuilder.setContentText("Download complete")
+		// Removes the progress bar
+				.setProgress(0, 0, false);
 		mNotifyManager.notify(NOTIFY_ID, mBuilder.build());
 		super.onDestroy();
 	}
@@ -198,17 +210,15 @@ public class Uploader extends Service {
 			 * Integer.parseInt(response); }
 			 */
 		} catch (HttpHostConnectException e) {
-			Toast.makeText(Uploader.this, "Serveur indisponible",
-					Toast.LENGTH_SHORT).show();
+			STATUS = HTTP_SERVER;
 			e.printStackTrace();
-		
+
 		} catch (Exception e) {
-			Toast.makeText(Uploader.this, "Serveur indisponible",
-					Toast.LENGTH_SHORT).show();
+			STATUS = HTTP_SERVER;
 			e.printStackTrace();
 		}
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
