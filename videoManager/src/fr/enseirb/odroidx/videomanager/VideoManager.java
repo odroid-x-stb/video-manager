@@ -3,6 +3,7 @@ package fr.enseirb.odroidx.videomanager;
 import java.io.File;
 import java.util.ArrayList;
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -73,6 +74,9 @@ public class VideoManager extends Activity {
 				}
 			});
 		}
+		
+		STBRemoteControlCommunication stbrcc = new STBRemoteControlCommunication(this);
+	    stbrcc.doBindService();
 	}
 
 	@Override
