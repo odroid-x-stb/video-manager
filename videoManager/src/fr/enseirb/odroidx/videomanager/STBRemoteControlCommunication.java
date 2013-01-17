@@ -184,6 +184,7 @@ public class STBRemoteControlCommunication {
                 Message msg = Message.obtain(null, MSG__REGISTER_CLIENT);
                 msg.replyTo = mMessenger;
                 mService.send(msg);
+                mIsBound = true;
             } catch (RemoteException e) {
             	Log.e(TAG, "error :\n", e);
             }
@@ -196,7 +197,6 @@ public class STBRemoteControlCommunication {
 
     public void doBindService() {
         act.bindService(new Intent("RemoteControlService.intent.action.Launch"), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
     }
     
     public void doUnbindService() {
