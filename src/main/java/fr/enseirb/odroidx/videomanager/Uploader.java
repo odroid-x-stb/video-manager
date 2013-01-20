@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2012 Philippe Donon <pdonon@enseirb-matmeca.fr>
+ *
+ * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.gnu.org/licenses/lgpl-3.0.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package fr.enseirb.odroidx.videomanager;
 
 import java.io.BufferedInputStream;
@@ -20,6 +35,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -30,8 +46,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,7 +59,7 @@ public class Uploader extends Service {
 	static String SERVLET_UPLOAD = ":8080/dash-manager/upload?name=";
 	private String server_ip = null;
 	NotificationManager mNotifyManager = null;
-	Builder mBuilder = null;
+	Notification.Builder mBuilder = null;
 	private volatile Looper mUploadLooper;
 	private volatile ServiceHandler mUploadHandler;
 	private HttpClient client = null;
@@ -128,7 +142,7 @@ public class Uploader extends Service {
 					byte_array.reset();
 					if ((i % 250) == 0) {
 						mBuilder.setProgress(nb_parts, i, false);
-						mNotifyManager.notify(NOTIFY_ID, mBuilder.build());
+						mNotifyManager.notify(NOTIFY_ID, mBuilder.getNotification());
 					}
 				}
 				int remaining = (int) (f.length() - nb_parts * PART_SIZE);
@@ -181,13 +195,20 @@ public class Uploader extends Service {
 			// Removes the progress bar
 			.setProgress(0, 0, false);
 		}
+<<<<<<< HEAD:videoManager/src/fr/enseirb/odroidx/videomanager/Uploader.java
 		mNotifyManager.notify(NOTIFY_ID, mBuilder.build());
+=======
+		mBuilder.setContentText("Download complete")
+		// Removes the progress bar
+				.setProgress(0, 0, false);
+		mNotifyManager.notify(NOTIFY_ID, mBuilder.getNotification());
+>>>>>>> bf03121fb2a152f06ad56416a5f8be4298b0c098:src/main/java/fr/enseirb/odroidx/videomanager/Uploader.java
 		super.onDestroy();
 	}
 
 	private final void createNotification() {
 		mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mBuilder = new NotificationCompat.Builder(this);
+		mBuilder = new Notification.Builder(this);
 		mBuilder.setContentTitle("Uploading Movie")
 				.setContentText("Upload in progress")
 				.setSmallIcon(R.drawable.ic_launcher);
