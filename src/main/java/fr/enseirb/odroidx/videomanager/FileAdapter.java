@@ -64,14 +64,14 @@ public class FileAdapter extends ArrayAdapter<File> {
 
 		File item = getItem(position);
 
-		// Colors
+		// Color
 		if (item.isDirectory()) {
 			vue.setTextColor(Color.BLUE);
 			Drawable myIcon = context.getResources().getDrawable(R.drawable.folder);
 			vue.setCompoundDrawablesWithIntrinsicBounds(myIcon, null,
 					null, null );
 		} else{
-			vue.setTextColor(Color.WHITE);
+			vue.setTextColor(Color.BLACK);
 			Drawable myIcon = context.getResources().getDrawable(R.drawable.file);
 			vue.setCompoundDrawablesWithIntrinsicBounds(myIcon, null,
 					null, null );

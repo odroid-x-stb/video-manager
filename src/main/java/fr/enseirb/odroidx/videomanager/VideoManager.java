@@ -51,7 +51,7 @@ public class VideoManager extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_video_manager);
-		//Getting Ip from Customized HomeScreen
+
 		Intent home = getIntent();
 		if (home.getStringExtra("serverIP") != null) {
 			ip = home.getStringExtra("serverIP");
@@ -61,7 +61,8 @@ public class VideoManager extends Activity {
 		// Test repository mounted (readable) writable ?
 		if (!Environment.MEDIA_MOUNTED.equals(Environment
 				.getExternalStorageState())) {
-			Toast.makeText(this, R.string.nomounted, Toast.LENGTH_SHORT).show();
+			mEmpty = (TextView) mGrid.getEmptyView();
+			mEmpty.setText(R.string.nomounted);
 		} else {
 			mCurrentFile = Environment.getExternalStorageDirectory();
 			setTitle(mCurrentFile.getAbsolutePath());
@@ -84,7 +85,7 @@ public class VideoManager extends Activity {
 					if (fichier.isDirectory())
 						updateDirectory(fichier);
 					else
-						uploadItem(fichier);
+						seeItem(fichier);
 				}
 			});
 		}
@@ -94,7 +95,6 @@ public class VideoManager extends Activity {
 	}
 
 	@Override
-	//Option to set server IP
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_video_manager, menu);
 		if (ip == null) {
@@ -108,10 +108,6 @@ public class VideoManager extends Activity {
 		if (item.getItemId() == R.id.menu_ip) {
 			startActivityForResult(new Intent(this, Parameters.class),
 					CODE_RETOUR);
-		}
-		else if (item.getItemId() == R.id.quit){
-	        finish();
-	        return true;		
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -171,8 +167,7 @@ public class VideoManager extends Activity {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	//Launch service to upload the file
-	private void uploadItem(File pFile) {
+	private void seeItem(File pFile) {
 		videoToUpload = Uri.fromFile(pFile);
 		Intent uploadIntent = new Intent();
 		uploadIntent.putExtra("IP", ip);

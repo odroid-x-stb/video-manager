@@ -95,10 +95,10 @@ public class Uploader extends Service {
 	}
 
 	public void onStart(Intent uploadintent, int startId) {
-		//Getting data to send to the message queue
+		// recup des data pour envoi via msg dans la msgqueue pour traitement
 		Message msg = mUploadHandler.obtainMessage();
 		msg.arg1 = startId;
-		//Putting IRU in message for handler
+		// on place l'uri reçu dans l'intent dans le msg pour le handler
 		msg.obj = uploadintent.getData();
 		server_ip = uploadintent.getStringExtra("IP");
 		Log.d("uploader", "server ip : " + server_ip);
@@ -115,7 +115,7 @@ public class Uploader extends Service {
 	public void doUpload(Uri myFile) {
 		createNotification();
 		File f = new File(myFile.getPath());
-		SendName(f.getName().replace(' ', '-'));
+		SendName(f.getName());
 		Log.e(getClass().getSimpleName(), "test: " + f.exists());
 		if (f.exists()) {
 			Socket s;
@@ -191,18 +191,9 @@ public class Uploader extends Service {
 		default:
 			Toast.makeText(Uploader.this, R.string.uploadEnd,
 					Toast.LENGTH_SHORT).show();
-			mBuilder.setContentText("Download complete")
-			// Removes the progress bar
-			.setProgress(0, 0, false);
+		mBuilder.setContentText("Download complete").setProgress(0, 0, false);
 		}
-<<<<<<< HEAD:videoManager/src/fr/enseirb/odroidx/videomanager/Uploader.java
-		mNotifyManager.notify(NOTIFY_ID, mBuilder.build());
-=======
-		mBuilder.setContentText("Download complete")
-		// Removes the progress bar
-				.setProgress(0, 0, false);
 		mNotifyManager.notify(NOTIFY_ID, mBuilder.getNotification());
->>>>>>> bf03121fb2a152f06ad56416a5f8be4298b0c098:src/main/java/fr/enseirb/odroidx/videomanager/Uploader.java
 		super.onDestroy();
 	}
 
@@ -214,7 +205,6 @@ public class Uploader extends Service {
 				.setSmallIcon(R.drawable.ic_launcher);
 	}
 
-	//Send file name to the servlet
 	private final int SendName(String fileName) {
 		int port = PORT;
 		try {
